@@ -1,137 +1,297 @@
-import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
-import "./styles.css";
-
-const socket = io("http://localhost:4000");
-
-// Dataset of sentences
-const sentences = [
-  "The quick brown fox jumps over the lazy dog.",
-  "Pack my box with five dozen liquor jugs.",
-  "Sphinx of black quartz, judge my vow.",
-  "How razorback-jumping frogs can level six piqued gymnasts!",
-  "Bright vixens jump; dozy fowl quack.",
-  "Jackdaws love my big sphinx of quartz.",
-  "The five boxing wizards jump quickly.",
-  "Crazy Fredrick bought many very exquisite opal jewels.",
-];
+import React, { useState, useEffect, useCallback } from 'react'
+import { socket } from './socket'
+import RaceTrack from './components/RaceTrack'
+import Leaderboard from './components/Leaderboard'
+import Auth from './components/Auth'
+import SplashScreen from './components/SplashScreen'
+import Menu from './components/Menu'
+import Lobby from './components/Lobby'
+import './styles.css'
 
 function App() {
-  const [sentence, setSentence] = useState(
-    sentences[Math.floor(Math.random() * sentences.length)]
-  );
-  const [input, setInput] = useState("");
-  const [progress, setProgress] = useState(0);
-  const [accuracy, setAccuracy] = useState(100);
-  const [timeLeft, setTimeLeft] = useState(20); // Reduced time for challenge
-  const [isFinished, setIsFinished] = useState(false);
+  const [gameState, setGameState] = useState('splash') // splash, auth, menu, lobby, timer-select, racing, finished
+  const [playerName, setPlayerName] = useState('')
+  const [playerEmail, setPlayerEmail] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [roomId, setRoomId] = useState('')
+  const [roomCode, setRoomCode] = useState('')
+  const [error, setError] = useState('')
+  const [playerCount, setPlayerCount] = useState(0)
+  const [raceResult, setRaceResult] = useState(null)
+  const [selectedTimer, setSelectedTimer] = useState(60)
+  const [roomPlayers, setRoomPlayers] = useState([])
+  const [isRoomCreator, setIsRoomCreator] = useState(false)
+  const [raceSession, setRaceSession] = useState(null)
 
-  // Timer countdown
+  const TIMER_OPTIONS = [30, 60, 120, 300]
+
   useEffect(() => {
-    if (isFinished) return;
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setIsFinished(true);
-    }
-  }, [timeLeft, isFinished]);
-
-  // Socket listener (for future multiplayer)
-  useEffect(() => {
-    socket.on("typing-progress", (data) => {
-      setProgress(data.progress);
-      setAccuracy(data.accuracy);
-    });
-  }, []);
-
-  // Handle typing input
-  const handleChange = (e) => {
-    if (isFinished) return;
-    const value = e.target.value;
-    setInput(value);
-
-    let correctChars = 0;
-    for (let i = 0; i < value.length; i++) {
-      if (value[i] === sentence[i]) correctChars++;
+    const handleRoomCreated = (data) => {
+      setRoomCode(data.code)
+      setRoomId(data.roomId)
+      setIsRoomCreator(true)
+      setGameState('lobby')
+      setError('')
+      setRoomPlayers([{ name: playerName, status: 'ready' }])
     }
 
-    const newProgress = Math.min((correctChars / sentence.length) * 100, 100);
-    const newAccuracy = value.length ? (correctChars / value.length) * 100 : 100;
+    const handleRoomJoined = (data) => {
+      setRoomId(data.roomId)
+      setRoomCode(data.code)
+      setIsRoomCreator(false)
+      setGameState('lobby')
+      setError('')
+      setRoomPlayers(data.players || [{ name: playerName }])
+    }
 
-    setProgress(newProgress);
-    setAccuracy(newAccuracy);
+    const handlePlayerJoined = (data) => {
+      setPlayerCount(data.count)
+      setRoomPlayers(data.players || [])
+    }
 
-    socket.emit("typing-progress", { progress: newProgress, accuracy: newAccuracy });
+    const handlePlayerLeft = (data) => {
+      setPlayerCount(data.count)
+      setRoomPlayers(data.players || [])
+    }
 
-    // Stop game if sentence completed
-    if (value === sentence) setIsFinished(true);
-  };
+    const handleTimerSelected = (timer) => {
+      setSelectedTimer(timer)
+    }
 
-  const handleFinishGame = () => setIsFinished(true);
+    const handleRaceStarting = (data) => {
+      console.log('🏁 RACE STARTING EVENT RECEIVED:', data)
+      setRaceSession(data)
+      setGameState('racing')
+      console.log('✅ Game state WILL change to racing')
+    }
 
-  const handleNewSentence = () => {
-    const newSent = sentences[Math.floor(Math.random() * sentences.length)];
-    setSentence(newSent);
-    setInput("");
-    setProgress(0);
-    setAccuracy(100);
-    setTimeLeft(20);
-    setIsFinished(false);
-  };
+    const handleRaceFinished = (result) => {
+      setRaceResult(result)
+      setGameState('finished')
+    }
 
-  return (
-    <div className="app">
-      <h1>Typing Speed Race</h1>
+    const handleNextRace = () => {
+      setRaceResult(null)
+      setGameState('lobby')
+    }
 
-      <p className="sentence">
-        {sentence.split("").map((char, i) => {
-          let className = "";
-          if (i < input.length) {
-            className = char === input[i] ? "correct" : "wrong";
-          }
-          return (
-            <span key={i} className={className}>
-              {char}
-            </span>
-          );
-        })}
-      </p>
+    const handleError = (msg) => {
+      setError(msg)
+      setTimeout(() => setError(''), 5000)
+    }
 
-      <input
-        type="text"
-        value={input}
-        onChange={handleChange}
-        placeholder="Start typing..."
-        disabled={isFinished}
+    socket.on('roomCreated', handleRoomCreated)
+    socket.on('roomJoined', handleRoomJoined)
+    socket.on('playerJoined', handlePlayerJoined)
+    socket.on('playerLeft', handlePlayerLeft)
+    socket.on('timerSelected', handleTimerSelected)
+    socket.on('raceStarting', handleRaceStarting)
+    socket.on('raceFinished', handleRaceFinished)
+    socket.on('nextRace', handleNextRace)
+    socket.on('error', handleError)
+
+    return () => {
+      socket.off('roomCreated', handleRoomCreated)
+      socket.off('roomJoined', handleRoomJoined)
+      socket.off('playerJoined', handlePlayerJoined)
+      socket.off('playerLeft', handlePlayerLeft)
+      socket.off('timerSelected', handleTimerSelected)
+      socket.off('raceStarting', handleRaceStarting)
+      socket.off('raceFinished', handleRaceFinished)
+      socket.off('nextRace', handleNextRace)
+      socket.off('error', handleError)
+    }
+  }, [])
+
+  const handleCreateRoom = useCallback(() => {
+    if (!playerName.trim()) {
+      setError('Please enter your name')
+      return
+    }
+    socket.emit('createRoom', { playerName }, (response) => {
+      if (response && response.success) {
+        console.log('Room created:', response.code)
+      } else {
+        setError(response?.message || 'Failed to create room')
+      }
+    })
+  }, [playerName])
+
+  const handleJoinRoom = useCallback(() => {
+    if (!playerName.trim()) {
+      setError('Please enter your name')
+      return
+    }
+    if (!roomCode.trim()) {
+      setError('Please enter a room code')
+      return
+    }
+    socket.emit('joinRoom', { roomCode: roomCode.toUpperCase(), playerName }, (response) => {
+      if (response && response.success) {
+        console.log('Joined room:', response.code)
+      } else {
+        setError(response?.message || 'Failed to join room')
+      }
+    })
+  }, [playerName, roomCode])
+
+  const handleSelectTimer = useCallback((timer) => {
+    setSelectedTimer(timer)
+    socket.emit('selectTimer', { roomCode, timer })
+  }, [roomCode])
+
+  const handleStartRace = useCallback(() => {
+    if (playerCount < 1 && !isRoomCreator) {
+      setError('Waiting for other players...')
+      return
+    }
+    socket.emit('startRace', { roomCode, timer: selectedTimer })
+  }, [roomCode, playerCount, selectedTimer, isRoomCreator])
+
+  const handlePlayAgain = useCallback(() => {
+    socket.emit('nextRace', { roomCode })
+    setRaceResult(null)
+    setGameState('lobby')
+  }, [roomCode])
+
+  const handleLeaveRoom = useCallback(() => {
+    socket.emit('leaveRoom', { roomCode })
+    setGameState('menu')
+    setRoomCode('')
+    setRoomId('')
+    setPlayerCount(0)
+    setRoomPlayers([])
+    setIsRoomCreator(false)
+    setError('')
+  }, [roomCode])
+
+  const handleAuthSuccess = (user) => {
+    setPlayerName(user.displayName || user.email || user.phone)
+    setPlayerEmail(user.email || user.phone)
+    setIsAuthenticated(true)
+    setGameState('menu')
+    setError('')
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    setGameState('auth')
+    setPlayerName('')
+    setPlayerEmail('')
+    setRoomCode('')
+    setRoomId('')
+    setRoomPlayers([])
+    setError('')
+  }
+
+  if (gameState === 'splash') {
+    return <SplashScreen onComplete={() => setGameState('auth')} />
+  }
+
+  if (gameState === 'auth') {
+    return <Auth onAuthSuccess={handleAuthSuccess} />
+  }
+
+  if (gameState === 'menu') {
+    return (
+      <Menu
+        playerName={playerName}
+        playerEmail={playerEmail}
+        onCreateRoom={handleCreateRoom}
+        onJoinRoom={(code) => {
+          setRoomCode(code)
+          setGameState('lobby')
+        }}
       />
+    )
+  }
 
-      <div className="progress-bar">
-        <div className="progress" style={{ width: `${progress}%` }}></div>
+  if (gameState === 'lobby') {
+    return (
+      <Lobby
+        roomCode={roomCode}
+        playerName={playerName}
+        playerEmail={playerEmail}
+        isRoomCreator={isRoomCreator}
+        roomPlayers={roomPlayers}
+        onStartRace={() => socket.emit('startRace', { roomCode, timer: selectedTimer })}
+        onLeaveRoom={handleLeaveRoom}
+      />
+    )
+  }
+
+  if (gameState === 'racing') {
+    return (
+      <RaceTrack
+        roomCode={roomCode}
+        playerName={playerName}
+        timer={raceSession?.timer || selectedTimer}
+        onFinish={(result) => {
+          setRaceResult(result)
+          setGameState('finished')
+        }}
+      />
+    )
+  }
+
+  if (gameState === 'finished' && raceResult) {
+    return (
+      <div className="results-container">
+        <div className="results-card">
+          <h2>🏁 Race Finished!</h2>
+
+          <div className="results-grid">
+            <div className="result-item">
+              <div className="result-label">WPM</div>
+              <div className="result-value">{raceResult.wpm}</div>
+            </div>
+            <div className="result-item">
+              <div className="result-label">Accuracy</div>
+              <div className="result-value">{raceResult.accuracy}%</div>
+            </div>
+            <div className="result-item">
+              <div className="result-label">Time</div>
+              <div className="result-value">{raceResult.time}s</div>
+            </div>
+          </div>
+
+          {raceResult.placement && (
+            <div className={`placement placement-${raceResult.placement}`}>
+              {raceResult.placement === 1 ? '🥇 1st Place!' : `${raceResult.placement}th Place`}
+            </div>
+          )}
+
+          <div className="session-leaderboard">
+            <h3>Current Session Results</h3>
+            <div className="session-table">
+              {raceResult.sessionResults &&
+                raceResult.sessionResults.map((entry, idx) => (
+                  <div key={idx} className="session-row">
+                    <span className="session-rank">#{idx + 1}</span>
+                    <span className="session-name">{entry.name}</span>
+                    <span className="session-wpm">{entry.wpm} WPM</span>
+                    <span className="session-accuracy">{entry.accuracy}%</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          <div className="results-actions">
+            <button onClick={() => setGameState('lobby')} className="btn btn-primary">
+              Next Race
+            </button>
+            <button onClick={handleLeaveRoom} className="btn btn-ghost">
+              Leave Room
+            </button>
+          </div>
+
+          <Leaderboard sessionMode={true} roomCode={roomCode} />
+        </div>
       </div>
-
-      <p>Progress: {progress.toFixed(2)}%</p>
-      <p>Accuracy: {accuracy.toFixed(2)}%</p>
-      <p>Time Left: {timeLeft}s</p>
-
-      {!isFinished && (
-        <button onClick={handleFinishGame} className="finish-btn">
-          Finish Game
-        </button>
-      )}
-
-      {isFinished && (
-        <>
-          <h2>✅ Game Finished!</h2>
-          <p>Final Progress: {progress.toFixed(2)}%</p>
-          <p>Final Accuracy: {accuracy.toFixed(2)}%</p>
-          <button onClick={handleNewSentence}>Next Sentence</button>
-        </>
-      )}
-    </div>
-  );
+    )
+  }
 }
 
-export default App;
+export default App
 
 

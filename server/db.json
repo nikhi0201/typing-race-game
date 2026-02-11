@@ -1,4 +1,228 @@
 {
-"leaderboard": [],
-"runs": []
+  "users": [
+    {
+      "id": "demo-user-001",
+      "displayName": "Demo Player",
+      "email": "demo@example.com",
+      "phone": "+1234567890",
+      "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2025-01-24T00:00:00Z",
+      "stats": {
+        "totalRaces": 5,
+        "totalWins": 2,
+        "averageWPM": 75,
+        "averageAccuracy": 94.2
+      }
+    },
+    {
+      "id": "a47fb245e10e9f1ba27618940fec3313",
+      "displayName": "Nikhith",
+      "email": "nikki020106@gmail.com",
+      "phone": null,
+      "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-01-24T05:04:59.820Z",
+      "stats": {
+        "totalRaces": 0,
+        "totalWins": 0,
+        "averageWPM": 0,
+        "averageAccuracy": 0
+      }
+    },
+    {
+      "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "displayName": "Nikhith",
+      "email": "23211a66g7@bvrit.ac.in",
+      "phone": null,
+      "password": "02bce958529425a2992f01f6535efb624e6bda316031bf707750f3f8840f9c8b",
+      "createdAt": "2026-01-24T05:33:54.456Z",
+      "stats": {
+        "totalRaces": 5,
+        "totalWins": 5,
+        "averageWPM": 9.8,
+        "averageAccuracy": 61
+      }
+    }
+  ],
+  "leaderboard": [
+    {
+      "id": "entry-001",
+      "userId": "demo-user-001",
+      "userName": "Demo Player",
+      "wpm": 85,
+      "accuracy": 95,
+      "time": 60,
+      "roomCode": "ABC123",
+      "timestamp": "2025-01-24T10:30:00Z"
+    },
+    {
+      "id": "entry-002",
+      "userId": "demo-user-001",
+      "userName": "Demo Player",
+      "wpm": 72,
+      "accuracy": 93,
+      "time": 60,
+      "roomCode": "XYZ789",
+      "timestamp": "2025-01-24T11:00:00Z"
+    },
+    {
+      "id": "773fdcb7471e8ffc60ee1fd93ee0344d",
+      "userId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "userName": "Nikhith",
+      "wpm": 4,
+      "accuracy": 27,
+      "time": 30,
+      "roomCode": "1OKYI3",
+      "timestamp": "2026-01-24T13:59:28.914Z"
+    },
+    {
+      "id": "c9c866b80cf24755d9198a70da881465",
+      "userId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "userName": "Nikhith",
+      "wpm": 11,
+      "accuracy": 96,
+      "time": 30,
+      "roomCode": "1B9XW8",
+      "timestamp": "2026-01-24T14:02:40.111Z"
+    },
+    {
+      "id": "0f0d815a893c02240bf56cae4ce507bc",
+      "userId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "userName": "Nikhith",
+      "wpm": 6,
+      "accuracy": 41,
+      "time": 30,
+      "roomCode": "AJ7756",
+      "timestamp": "2026-01-24T14:11:37.543Z"
+    },
+    {
+      "id": "2caf324b9cea271ceb45986bb50ff08c",
+      "userId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "userName": "Nikhith",
+      "wpm": 9,
+      "accuracy": 49,
+      "time": 60,
+      "roomCode": "JMVYFM",
+      "timestamp": "2026-01-24T14:14:09.968Z"
+    },
+    {
+      "id": "9327f3e5b6df2986b5df8c750a1085cc",
+      "userId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "userName": "Nikhith",
+      "wpm": 19,
+      "accuracy": 92,
+      "time": 30,
+      "roomCode": "E1OEK7",
+      "timestamp": "2026-01-24T15:09:56.794Z"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "9fa668e1db32fee8c7f10784778ad105",
+      "code": "QU0W7J",
+      "creatorId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "creatorName": "Nikhith",
+      "players": [
+        {
+          "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+          "name": "Nikhith",
+          "status": "ready",
+          "socketId": "O2B32jk2BbRp7__gAAAJ"
+        }
+      ],
+      "status": "waiting",
+      "timer": 60,
+      "startTime": null,
+      "createdAt": "2026-01-24T06:27:08.443Z"
+    },
+    {
+      "id": "2bb44e5b8e9c67ea138ea8c03f0596c9",
+      "code": "SY1I94",
+      "creatorId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "creatorName": "Nikhith",
+      "players": [
+        {
+          "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+          "name": "Nikhith",
+          "status": "ready",
+          "socketId": "iCRGJmwQOOC2TDaHAAAH",
+          "isReady": true
+        }
+      ],
+      "status": "racing",
+      "timer": 30,
+      "startTime": 1769262676758,
+      "createdAt": "2026-01-24T13:50:57.895Z",
+      "countdownStart": 1769262666746,
+      "countdownDuration": 30
+    },
+    {
+      "id": "833cf3d436713b2176d6ffe2f394dfad",
+      "code": "1OKYI3",
+      "creatorId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "creatorName": "Nikhith",
+      "players": [
+        {
+          "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+          "name": "Nikhith",
+          "status": "ready",
+          "socketId": "l00C2NGNAUPvu8B-AAA7",
+          "isReady": true,
+          "wpm": 4,
+          "accuracy": 27,
+          "time": 30,
+          "finished": true
+        }
+      ],
+      "status": "racing",
+      "timer": 30,
+      "startTime": 1769263138886,
+      "createdAt": "2026-01-24T13:58:44.464Z",
+      "countdownStart": 1769263128872,
+      "countdownDuration": 30
+    },
+    {
+      "id": "63999fa4263a63b8b4e4535c6d5f0ae8",
+      "code": "E1OEK7",
+      "creatorId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "creatorName": "Nikhith",
+      "players": [
+        {
+          "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+          "name": "Nikhith",
+          "status": "ready",
+          "socketId": "4DDgRqCp2Dd02JDrAAAB",
+          "isReady": true,
+          "wpm": 19,
+          "accuracy": 92,
+          "time": 30,
+          "finished": true
+        }
+      ],
+      "status": "racing",
+      "timer": 30,
+      "startTime": 1769267366777,
+      "createdAt": "2026-01-24T15:09:10.384Z",
+      "countdownStart": 1769267356759,
+      "countdownDuration": 30
+    },
+    {
+      "id": "9c6b62fe12319c5b6f84b3c8d441604e",
+      "code": "HYQO2P",
+      "creatorId": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+      "creatorName": "Nikhith",
+      "players": [
+        {
+          "id": "5e2cbf4dc92c23c0972a3e99a04b9cfe",
+          "name": "Nikhith",
+          "status": "ready",
+          "socketId": "1rFjTmT1Tnu_jW3lAAAJ"
+        }
+      ],
+      "status": "waiting",
+      "timer": 60,
+      "startTime": null,
+      "createdAt": "2026-01-24T15:34:21.596Z"
+    }
+  ],
+  "runs": []
 }
